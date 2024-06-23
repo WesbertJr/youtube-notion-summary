@@ -1,8 +1,6 @@
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
 from pytube import YouTube
-import requests
-import json
 
 
 class YoutubeData:
@@ -17,13 +15,12 @@ class YoutubeData:
 
 def formatLink(url):
     link = url.split('=')
-    video_id = link[1]
-    return video_id
-
-# https://www.youtube.com/watch?v=8R-cetf_sZ4
+    formatted_id = link[1]
+    return formatted_id
 
 
-def call_youtube(link, id):
+def youtube_api(link):
+    id = formatLink(link)
     yt = YouTube(link)  # Create Youtube Object..
 
     # call the function
@@ -32,9 +29,10 @@ def call_youtube(link, id):
     formatter = TextFormatter()
     # .format_transcript(transcript) turns the transcript into a JSON string.
     transcript = formatter.format_transcript(video_subtitles)
-    data = YoutubeData(video_id, yt.author, yt.title, yt.embed_url, yt.thumbnail_url, transcript)
+    data = YoutubeData(id, yt.author, yt.title, yt.embed_url, yt.thumbnail_url, transcript)
 
     # Define Video Details
+    print("Video Id : ", id)
     print("Title : ", data.title)
     print("URL : ", data.url)
     print("Author : ", data.author)
@@ -44,6 +42,5 @@ def call_youtube(link, id):
 
 
 user_input = "https://www.youtube.com/watch?v=8R-cetf_sZ4"
-video_id = formatLink(user_input)
 
-call_youtube(user_input, video_id)
+youtube_api(user_input)
