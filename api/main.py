@@ -9,8 +9,7 @@ import json
 from pydantic import BaseModel
 import os
 from openai import OpenAI
-
-os.environ["OPENAI_API_KEY"] = Contants.OPENAI_API_KEY
+os.environ["OPENAI_API_KEY"] = process.env.OPENAI_API_KEY
 
 
 class YoutubeLink(BaseModel):
@@ -193,11 +192,14 @@ def youtube_api(link):
 
 
 def start(url):
-    # "https://www.youtube.com/watch?v=8R-cetf_sZ4"
+    PROMPT = "Take on the role of a seasoned writer and summarize the following. Response should include A Title, " \
+             "5 sections, a title for each section, a paragraph summary for each section, bullet points, " \
+             "and 1 quotation for each section.\n Video Title:\n; Section 1:\n; Summary:\n; 3 bullet points:\n " \
+             "\nQuotation: "
     user_input = url
-    gpt_prompt = Contants.PROMPT
-    NOTION_TOKEN = Contants.NOTION_TOKEN
-    DATABASE_ID = Contants.DATABASE_ID
+    gpt_prompt = PROMPT
+    NOTION_TOKEN = process.env.NOTION_TOKEN
+    DATABASE_ID = process.env.DATABASE_ID
 
     youtube_obj = youtube_api(user_input)
     chatgpt_obj = chatgpt_api(gpt_prompt, youtube_obj)
