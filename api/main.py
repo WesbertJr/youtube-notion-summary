@@ -218,6 +218,10 @@ async def read_root():
     message = "Application is running...."
     return message
 
+@app.get("/test")
+async def read_root():
+    data = youtube_api("https://www.youtube.com/watch?v=j7Rzx-_AzQY")
+    return data
 
 @app.post("/youtube/data")
 async def get_ytData(obj: YoutubeLink):
