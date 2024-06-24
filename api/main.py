@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
 from pytube import YouTube
-import Contants
 import requests
 import json
 from pydantic import BaseModel
