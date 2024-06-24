@@ -1,15 +1,20 @@
 from typing import Union
-
 from fastapi import FastAPI
+from methods import *
 
 app = FastAPI()
 
 
 @app.get("/")
 async def read_root():
-    return {"Hello": "World"}
+    messasge = "Application is running...."
+    return messasge
 
 
-@app.get("/items/{item_id}")
-async def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+@app.post("/youtube/data")
+async def get_ytData(obj: YoutubeLink):
+    provided = obj.link
+    data = start(provided)
+
+    return data
+
