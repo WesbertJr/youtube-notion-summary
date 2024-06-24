@@ -8,7 +8,9 @@ import json
 from pydantic import BaseModel
 import os
 from openai import OpenAI
+
 os.environ.get('OPENAI_API_KEY')
+
 
 class YoutubeLink(BaseModel):
     link: str
@@ -223,4 +225,3 @@ async def get_ytData(obj: YoutubeLink):
     data = start(provided)
 
     return data
-
