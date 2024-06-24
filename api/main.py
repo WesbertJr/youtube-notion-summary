@@ -213,8 +213,8 @@ app = FastAPI()
 
 @app.get("/")
 async def read_root():
-    messasge = "Application is running...."
-    return messasge
+    message = "Application is running...."
+    return message
 
 
 @app.post("/youtube/data")
