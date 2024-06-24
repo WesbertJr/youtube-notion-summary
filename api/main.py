@@ -193,8 +193,8 @@ def youtube_api(link):
 
 def start(url):
     PROMPT = "Take on the role of a seasoned writer and summarize the following. Response should include A Title, " \
-             "5 sections, a title for each section, a paragraph summary for each section, bullet points, " \
-             "and 1 quotation for each section.\n Video Title:\n; Section 1:\n; Summary:\n; 3 bullet points:\n " \
+             "1 sections, a title for each section,1 sentence summary for each section" \
+             "\n Video Title:\n; Section 1:\n; Summary:\n; 3 bullet points:\n " \
              "\nQuotation: "
     user_input = url
     gpt_prompt = PROMPT
