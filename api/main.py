@@ -9,8 +9,7 @@ import json
 from pydantic import BaseModel
 import os
 from openai import OpenAI
-os.environ["OPENAI_API_KEY"] = process.env.OPENAI_API_KEY
-
+os.environ.get('OPENAI_API_KEY')
 
 class YoutubeLink(BaseModel):
     link: str
@@ -198,8 +197,8 @@ def start(url):
              "\nQuotation: "
     user_input = url
     gpt_prompt = PROMPT
-    NOTION_TOKEN = process.env.NOTION_TOKEN
-    DATABASE_ID = process.env.DATABASE_ID
+    NOTION_TOKEN = os.environ.get('NOTION_TOKEN')
+    DATABASE_ID = os.environ.get('DATABASE_ID')
 
     youtube_obj = youtube_api(user_input)
     chatgpt_obj = chatgpt_api(gpt_prompt, youtube_obj)
