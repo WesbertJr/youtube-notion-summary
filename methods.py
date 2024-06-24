@@ -32,10 +32,10 @@ class ChatGPTInfo:
 
 
 class NotionInfo:
-    def __init__(self, notion_token, database_id, yt):
+    def __init__(self, notion_token, database_id, status):
         self.notion_token = notion_token
         self.database_id = database_id
-        self.yt = yt
+        self.status = status
 
 
 class FastApiData:
@@ -62,7 +62,7 @@ def notion_api(tk, db_id, yt, gpt):
     response = requests.request("POST", url_endpoint, headers=headers, data=payload)
     print("Notion Database_ID: " + database)
     print(f"Notion Response: {response.status_code}")
-    data = NotionInfo(token, database, youtubeAPI)
+    data = NotionInfo(token, database, response.status_code)
 
     return data
 
@@ -141,7 +141,7 @@ def chatgpt_api(x, y):
         reply_split = reply[len(result):]
         reply = result
 
-    data = ChatGPTInfo("prompt", reply)
+    data = ChatGPTInfo(x, reply)
     print("Chat GPT Prompt: " + data.prompt)
     print("Response: " + data.gpt_response)
     return data
