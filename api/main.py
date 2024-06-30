@@ -1,5 +1,3 @@
-from typing import Union
-from typing import Optional
 from fastapi import FastAPI
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
@@ -11,13 +9,15 @@ import os
 from openai import OpenAI
 
 os.environ.get('OPENAI_API_KEY')
+os.environ.get('DATABASE_ID')
+os.environ.get('NOTION_TOKEN')
 
 
 class YoutubeLink(BaseModel):
     link: str
 
 
-class YoutubeData:
+class YoutubeInfo:
     def __init__(self, video_id, author, title, url, thumbnail, transcript):
         self.video_id = video_id
         self.author = author
@@ -28,9 +28,10 @@ class YoutubeData:
 
 
 class ChatGPTInfo:
-    def __init__(self, prompt, gpt_response):
+    def __init__(self, prompt, gpt_primary_res , gpt_secondary_res ):
         self.prompt = prompt
-        self.gpt_response = gpt_response
+        self.gpt_primary_res = gpt_primary_res
+        self.gpt_secondary_res  = gpt_secondary_res
 
 
 class NotionInfo:
@@ -112,7 +113,14 @@ def get_payload(d, yt_api, res):
                 "object": "block",
                 "type": "paragraph",
                 "paragraph": {
-                    "rich_text": [{"type": "text", "text": {"content": res.gpt_response}}]
+                    "rich_text": [{"type": "text", "text": {"content": res.gpt_primary_res}}]
+                }
+            },
+            {
+                "object": "block",
+                "type": "paragraph",
+                "paragraph": {
+                    "rich_text": [{"type": "text", "text": {"content": res.gpt_secondary_res}}]
                 }
             }
 
@@ -121,6 +129,11 @@ def get_payload(d, yt_api, res):
             "type": "external",
             "external": {
                 "url": yt_api.thumbnail
+            }
+        },
+        "icon": {
+            "external": {
+                "url": "https://em-content.zobj.net/source/apple/354/large-red-square_1f7e5.png"
             }
         }
     })
@@ -132,20 +145,19 @@ def chatgpt_api(x, y):
     content = get_json(x, y.transcript)
     client = OpenAI()
     chat = client.chat.completions.create(model="gpt-3.5-turbo", messages=content)
-    reply = chat.choices[0].message.content
-    reply_split = ""
-    content.append({"role": "assistant", "content": reply})
-    num_reply = len(reply)
-
+    primary = chat.choices[0].message.content
+    secondary = ""
+    content.append({"role": "assistant", "content": primary})
+    num_reply = len(primary)
     if num_reply > 2000:
         val = num_reply - 2000
-        result = reply[:-val]
-        reply_split = reply[len(result):]
-        reply = result
+        result = primary[:-val]
+        secondary = "[---REMOVE SPACE HERE ---]" + primary[len(result):]
+        primary = result
 
-    data = ChatGPTInfo(x, reply)
+    data = ChatGPTInfo(x, primary, secondary)
     print("Chat GPT Prompt: " + data.prompt)
-    print("Response: " + data.gpt_response)
+    print("Response: " + data.gpt_primary_res + data.gpt_secondary_res)
     return data
 
 
@@ -180,35 +192,36 @@ def youtube_api(link):
     formatter = TextFormatter()
     # .format_transcript(transcript) turns the transcript into a JSON string.
     transcript = formatter.format_transcript(video_subtitles)
-    data = YoutubeData(id, yt.author, yt.title, yt.embed_url, yt.thumbnail_url, transcript)
+    data = YoutubeInfo(id, yt.author, yt.title, yt.embed_url, yt.thumbnail_url, transcript)
 
     # Define Video Details
-    print("Video Id : ", data.video_id)
-    print("Title : ", data.title)
-    print("URL : ", data.url)
-    print("Author : ", data.author)
-    print("Thumbnail : ", data.thumbnail)
-    print("Transcript : ", data.transcript)
+    # print("Video Id : ", data.video_id)
+    # print("Title : ", data.title)
+    # print("URL : ", data.url)
+    # print("Author : ", data.author)
+    # print("Thumbnail : ", data.thumbnail)
+    # print("Transcript : ", data.transcript)
     return data
 
 
 def start(url):
     PROMPT = "Take on the role of a seasoned writer and summarize the following. Response should include A Title, " \
-             "1 sections, a title for each section,1 sentence summary for each section" \
-             "\n Video Title:\n; Section 1:\n; Summary:\n; 3 bullet points:\n " \
+             "5 sections, a title for each section, a paragraph summary for each section, bullet points, " \
+             "and 1 quotation for each section.\n Video Title:\n; Section 1:\n; Summary:\n; 3 bullet points:\n " \
              "\nQuotation: "
     user_input = url
     gpt_prompt = PROMPT
     NOTION_TOKEN = os.environ.get('NOTION_TOKEN')
     DATABASE_ID = os.environ.get('DATABASE_ID')
 
+    # redundant logic can simplify by improving class definitions
     youtube_obj = youtube_api(user_input)
     chatgpt_obj = chatgpt_api(gpt_prompt, youtube_obj)
     notion_obj = notion_api(NOTION_TOKEN, DATABASE_ID, youtube_obj, chatgpt_obj)
 
     data = FastApiData(youtube_obj, chatgpt_obj, notion_obj)
 
-    return "success"
+    return data
 
 
 app = FastAPI()
@@ -219,21 +232,9 @@ async def read_root():
     message = "Application is running...."
     return message
 
-@app.get("/test/")
-async def test():
-    data = youtube_api("https://www.youtube.com/watch?v=j7Rzx-_AzQY")
-    return data
 
-@app.post("/data/{video_id}")
-async def get_ytData(video_id: Optional[str] = None):
-    provided = "https://www.youtube.com/watch?v=" + video_id
-    data = start(provided)
-
-    return data
-
-
-@app.get("/youtube/{item_id}")
+@app.get("/items/{item_id}")
 async def read_item(item_id: str):
-    provided = "https://www.youtube.com/watch?v=" + item_id
-    start(provided)
-    return {"item_id": provided}
+    url = "https://www.youtube.com/watch?v=" + item_id
+    data = start(url)
+    return data
