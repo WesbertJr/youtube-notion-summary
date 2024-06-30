@@ -1,4 +1,5 @@
 from typing import Union
+from typing import Optional
 from fastapi import FastAPI
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import TextFormatter
@@ -218,14 +219,14 @@ async def read_root():
     message = "Application is running...."
     return message
 
-@app.get("/test")
+@app.get("/test/")
 async def test():
     data = youtube_api("https://www.youtube.com/watch?v=j7Rzx-_AzQY")
     return data
 
-@app.post("/youtube")
-async def get_ytData(obj: YoutubeLink):
-    provided = obj.link
+@app.post("/data/{video_id}")
+async def get_ytData(video_id: Optional[str] = None):
+    provided = "https://www.youtube.com/watch?v=" + video_id
     data = start(provided)
 
     return data
