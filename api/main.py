@@ -225,7 +225,7 @@ async def test():
     return data
 
 @app.post("/data/{video_id}")
-async def get_ytData(video_id: Optional[str] = None):
+async def get_ytData(video_id):
     provided = "https://www.youtube.com/watch?v=" + video_id
     data = start(provided)
 
