@@ -208,7 +208,7 @@ def start(url):
 
     data = FastApiData(youtube_obj, chatgpt_obj, notion_obj)
 
-    return data
+    return "success"
 
 
 app = FastAPI()
@@ -225,8 +225,17 @@ async def test():
     return data
 
 @app.post("/data/{video_id}")
-async def get_ytData(video_id):
+async def get_ytData(video_id: Optional[str] = None):
     provided = "https://www.youtube.com/watch?v=" + video_id
     data = start(provided)
 
     return data
+
+
+@app.get("/youtube/{item_id}")
+async def read_item(item_id: str):
+    provided = "https://www.youtube.com/watch?v=" + item_id
+    print("provided: " + provided)
+    data = start(provided)
+    return data
+    # return {"item_id": item_id}
