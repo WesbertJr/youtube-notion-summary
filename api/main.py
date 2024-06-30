@@ -235,7 +235,5 @@ async def get_ytData(video_id: Optional[str] = None):
 @app.get("/youtube/{item_id}")
 async def read_item(item_id: str):
     provided = "https://www.youtube.com/watch?v=" + item_id
-    print("provided: " + provided)
-    data = start(provided)
-    return data
-    # return {"item_id": item_id}
+    start(provided)
+    return {"item_id": provided}
