@@ -233,8 +233,14 @@ async def read_root():
     return message
 
 
+@app.post("/youtube")
+async def read_root(item_id: str):
+    url = "https://www.youtube.com/watch?v=" + item_id
+    data = start(url)
+    return "updated"
+
 @app.get("/items/{item_id}")
 async def read_item(item_id: str):
     url = "https://www.youtube.com/watch?v=" + item_id
     data = start(url)
-    return data
+    return "done"
