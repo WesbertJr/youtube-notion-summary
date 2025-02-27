@@ -60,8 +60,6 @@ def notion_api(tk, db_id, yt, gpt):
 
     payload = get_payload(database, youtubeAPI, gptAPI)
     response = requests.request("POST", url_endpoint, headers=headers, data=payload)
-    print("Notion Database_ID: " + database)
-    print(f"Notion Response: {response.status_code}")
     data = NotionInfo(token, database, response.status_code)
 
     return data
